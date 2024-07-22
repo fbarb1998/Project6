@@ -2,12 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const stuffRoutes = require('./routes/stuff');
+const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
 const app = express();
+const path = require('path');
 
-mongoose.connect('mongodb+srv://fbarb1998:mfM3ixlPDXqzMd9M@cluster0.pcmsk0b.mongodb.net/')
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.pcmsk0b.mongodb.net/`)
     .then(() => {
         console.log('Sucessfully connected to MongoDB Atlas!')
     })
@@ -26,29 +27,8 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.use('/api/stuff', stuffRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 
-module.exports = app;
-
-// Route to handle API requests
-app.get('/api/stuff', (req, res, next) => {
-    Thing.find().then(
-        (things) => {
-            res.status(200).json(things);
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
-            });
-        }
-    );
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
 module.exports = app;
