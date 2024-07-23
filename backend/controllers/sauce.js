@@ -138,7 +138,7 @@ exports.getAllSauce = (req, res, next) => {
 exports.likeSauce = (req, res, next) => {
 
   console.log(req.params.id);
-  Sauce.findOne({_id: req.params.id}).then((sauce) => {
+  Sauce.findOne({ _id: req.params.id }).then((sauce) => {
     if (!sauce) {
       return res.status(404).json({ error: 'Sauce not found' });
     }
@@ -146,21 +146,17 @@ exports.likeSauce = (req, res, next) => {
     const like = req.body.like;
     switch (like) {
       case 1: // user likes the sauce
+        resetVote(sauce, userId);
         if (!sauce.usersLiked.includes(userId)) {
           sauce.likes++;
           sauce.usersLiked.push(userId);
         }
         break;
       case 0: // user removes their like
-        if (sauce.usersLiked.includes(userId)) {
-          sauce.likes--;
-          sauce.usersLiked = sauce.usersLiked.filter(id => id !== userId);
-        } else if (sauce.usersDisliked.includes(userId)) {
-          sauce.dislikes--;
-          sauce.usersDisliked = sauce.usersDisliked.filter(id => id !== userId);
-        }
+        resetVote(sauce, userId);
         break;
       case -1: // user dislikes the sauce
+        resetVote(sauce, userId);
         if (!sauce.usersDisliked.includes(userId)) {
           sauce.dislikes++;
           sauce.usersDisliked.push(userId);
@@ -181,3 +177,14 @@ exports.likeSauce = (req, res, next) => {
       res.status(404).json({ error: 'Sauce not found' });
     });
 };
+
+function resetVote(sauce, userId) {
+  if (sauce.usersLiked.includes(userId)) {
+    sauce.likes--;
+    sauce.usersLiked = sauce.usersLiked.filter(id => id !== userId);
+  }
+  if (sauce.usersDisliked.includes(userId)) {
+    sauce.dislikes--;
+    sauce.usersDisliked = sauce.usersDisliked.filter(id => id !== userId);
+  }
+}
